@@ -1,5 +1,106 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  header 
+    i(class="fas fa-flag")#logo
+    span The Dot Game - #{title}
+    i(class="fas fa-bars")#btn_menu
+  
+  div#info-panel
+    div#infotitle
+      i(class="fas fa-database")
+      span Game Data
+    div#gridwrapper
+      div(class="info-item")
+        div Latency
+      div(class="info-item") 
+        div#showlatency &nbsp;
+      div(class="info-item")
+        div Game Status
+      div(class="info-item")
+        div#gamestatus Pending
+      div(class="info-item")
+        div Opponent
+      div(class="info-item")
+        div#opponent &nbsp;
+      div(class="info-item")
+        div Channel
+      div(class="info-item")
+        div#channel &nbsp;
+      div(class="info-item")
+      div(class="info-item")
+    div#messagetitle 
+      i(class="fas fa-exclamation-triangle")
+      span Game Alerts
+    div#messagebox Hello! Welcome to Capture the Flag!
+
+  div#container(
+    class="container"
+    data-flag="false"
+    )
+    div#info-panel
+    div#canvas_container(class="glass")
+      canvas(
+        width=700
+        height=700
+      )#canvas
+  
+  div#menu
+    fieldset#formgroup
+      form#userinfo
+        h2 Start a New Game
+        em 1
+        select(required)#gamesize
+          option(
+            selected
+            value="700"
+            ) 700px * 700px
+        hr
+        em 2
+        select(required)#goalcount
+          option(value="1") 1 Goal
+        hr
+        em 3
+        input(
+          type="text"
+          placeholder="Player Name"
+          pattern="[a-z|A-Z|0-9]*"
+          title="Your player name"
+          required
+        )#username
+        hr
+        em 4
+        select(
+          required,
+          title="Join or Create Game"
+          )#hostorjoin
+          option(value="host") Create New Game
+          option(
+            selected
+            value="join"
+            ) Join Game
+        hr
+        div#startgame
+          em 5
+          input(
+            type="text"
+            placeholder="Enter Your Game Channel"
+            title="Enter your game channel name"
+            pattern="[a-z|A-Z|0-9]*"
+          )#newgame
+          input(
+            type="submit"
+            value="Start!"
+            )#btn_creategame
+        div#joingame
+          em 5
+          select(
+            required="true"
+            title="Join a game channel!"
+          )#gamestojoin
+          input(
+            type="submit"
+            value="Start!"
+            )#btn_joingame
+        hr
+        div#gamesetup Waiting for Player to Start
