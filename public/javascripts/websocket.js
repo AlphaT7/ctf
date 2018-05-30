@@ -74,15 +74,15 @@ function init() {
       case "gamedata":
         //after a game is joined by a 2nd player,
         //final game init data is sent to both players
-        let who = "";
-        db.gameinfo.get(1, function(info) {
-          who = info.who;
-        });
-        db.gameinfo.update(1, {
-          channel: data.channel,
-          playername: who == "host" ? data.guestname : data.hostname,
-          opponentname: who == "host" ? data.hostname : data.guestname
-        });
+
+        gameinfo.update(
+          { channel: { $eq: data.channel } },
+          {
+            channel: data.channel,
+            playername: who == "host" ? data.guestname : data.hostname,
+            opponentname: who == "host" ? data.hostname : data.guestname
+          }
+        );
         console.log(data);
         postMessage(data);
         break;

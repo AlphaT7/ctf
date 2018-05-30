@@ -15,6 +15,17 @@ exports = module.exports = function(WebSocket, url, ForerunnerDB) {
     //}, 3000);
     console.log(ws.id + " - id connected");
 
+    //broadcast the game list to sockets as soon as they connect
+    let list = gamelist.find({ playercount: { $eq: "1" } });
+    if (list.length != 0) {
+      let data = {};
+      data.type = "gamelistpost";
+      data.list = list;
+      ws.send(JSON.stringify(data));
+    } else {
+      console.log("list-empty");
+    }
+
     const broadcast = data => {
       //broadcast to everyone including the sender
       wss.clients.forEach(function each(client) {
@@ -49,7 +60,7 @@ exports = module.exports = function(WebSocket, url, ForerunnerDB) {
       });
     };
 
-    let data = "";
+    let data = {};
 
     ws.on("message", function incoming(message) {
       switch (JSON.parse(message).type) {
@@ -64,77 +75,83 @@ exports = module.exports = function(WebSocket, url, ForerunnerDB) {
         case "newgame":
           data = JSON.parse(message);
 
-          let glist = gamelist.find({ playercount: { $eq: "1" } });
-          console.log(JSON.stringify(glist));
-
-          gamelist.insert({
-            channel: data.channel,
-            host: ws.id,
-            hostname: data.playername,
-            playercount: "1",
-            gamesize: data.gamesize,
-            goalcount: data.goalcount
-          });
-
-          //console.log(gamelist);
-
-          //ws.send(JSON.stringify(glist));
-
-          /*          mdb.connect("mongodb://localhost:27017/", function(err, db) {
-            if (err) throw err;
-
-            var dbo = db.db("ctf");
-
-            dbo
-              .collection("gamelist")
-              .findOne({ channel: data.channel }, function(err, result) {
-                if (err) throw err;
-                if (result) {
-                  ws.send(
-                    JSON.stringify({
-                      type: "message",
-                      message:
-                        "The name '" +
-                        result.channel +
-                        "' is already in use.  Please pick a different name for your game channel."
-                    })
-                  );
-                } else {
-                  dbo
-                    .collection("gamelist")
-                    .insert({
-                      channel: data.channel,
-                      host: ws.id,
-                      hostname: data.playername,
-                      playercount: "1",
-                      gamesize: data.gamesize,
-                      goalcount: data.goalcount
-                    })
-                    .then(() => {
-                      ws.channel = data.channel;
-                    })
-                    .then(() => {
-                      ws.send(
-                        JSON.stringify({
-                          type: "message",
-                          message:
-                            "Game Channel '" +
-                            data.channel +
-                            "' Has Been Created!"
-                        })
-                      );
-                      broadcast({
-                        type: "gamelistupdate",
-                        channel: data.channel
-                      });
-                      db.close();
-                    });
-                }
-              });
-          });
-  */ break;
+          if (gamelist.find({ channel: { $eq: data.channel } }).length == 0) {
+            gamelist.insert({
+              channel: data.channel,
+              host: ws.id,
+              hostname: data.playername,
+              playercount: "1",
+              gamesize: data.gamesize,
+              goalcount: data.goalcount
+            });
+            ws.channel = data.channel;
+            ws.send(
+              JSON.stringify({
+                type: "message",
+                message: "Game channel '" + data.channel + "' has been created!"
+              })
+            );
+            broadcast1({
+              type: "gamelistupdate",
+              channel: data.channel
+            });
+          } else {
+            ws.send(
+              JSON.stringify({
+                type: "message",
+                message:
+                  "Game channel name '" +
+                  data.channel +
+                  "' is already in use. Please pick a different channel name."
+              })
+            );
+          }
+          break;
         case "joingame":
           data = JSON.parse(message);
+
+          if (
+            gamelist.find({
+              channel: { $eq: data.channel },
+              hostname: { $eq: data.playername }
+            }).length == 0
+          ) {
+            gamelist.update(
+              { channel: { $eq: data.channel } },
+              {
+                guest: ws.id,
+                guestname: data.playername,
+                playercount: "2"
+              }
+            );
+            ws.channel = data.channel;
+            broadcast({
+              type: "gamelistremoval",
+              channel: data.channel
+            });
+            ws.send(
+              JSON.stringify({
+                type: "message",
+                message:
+                  "Game Channel '" + data.channel + "' Joined Successfully!"
+              })
+            );
+
+            let gamedata = gamelist.find({ channel: { $eq: data.channel } });
+            gamedata[0].type = "gamedata";
+            broadcast2(gamedata[0]);
+          } else {
+            ws.send(
+              JSON.stringify({
+                type: "message",
+                message:
+                  "User name '" +
+                  data.playername +
+                  "' is already in use. Please pick a different user name."
+              })
+            );
+          }
+
           /*         mdb.connect("mongodb://localhost:27017/", function(err, db) {
             if (err) throw err;
 
