@@ -8,45 +8,6 @@ let vars = {
 
 vars.sprites.playerflag.src = "../images/waving-flag-blue.png";
 vars.sprites.opponentflag.src = "../images/waving-flag-red.png";
-/*
-webworker.onmessage = function(e) {
-  switch (e.data.type) {
-    case "init":
-      //repaint();
-      break;
-    case "gamelistupdate":
-      
-      break;
-    case "gamelistpost":
-      
-      break;
-    case "message":
-      
-      break;
-    case "gamelistremoval":
-      
-      break;
-    case "disableform":
-      $("#formgroup").disabled = true;
-      break;
-    case "gamedata":
-      db.gameinfo.get(1, function(info) {
-        $("#opponent").innerHTML = info.opponentname;
-        $("#channel").innerHTML = info.channel;
-      });
-      $("#gamesetup").innerHTML = "Starting...";
-      $("#gamesetup").classList.add("blink");
-      setTimeout(function() {
-        $("#gamesetup").classList.remove("blink");
-        $("#gamesetup").innerHTML = "Live";
-        $("#gamestatus").innerHTML = "Live";
-        $("#container").classList.remove("container_reveal");
-        $("#container").dataset.flag = false;
-      }, 3000);
-      break;
-  }
-};
-*/
 
 $("#canvas").addEventListener("click", function(e) {
   //  alert("test");
@@ -98,26 +59,22 @@ $("#userinfo").addEventListener("submit", function(e) {
 
   ws.send(JSON.stringify(data));
 
-  //init();
+  setPerameters();
 });
-/*
-const init = () => {
+
+const setPerameters = () => {
   // initialize the flag images
   let host = { x: 700 / 2, y: 0 };
   let guest = { x: 700 / 2, y: 0 };
   let hostflag_y = 0;
   let guestflag_y = 0;
-  let who = "";
-
-  db.gameinfo.get(1, function(info) {
-    who = info.who;
-  });
+  let who = gameinfo.find({ who: { $ne: "" } })[0].who;
 
   who == "host" ? (host.y = 30) : (host.y = 670);
   who == "guest" ? (guest.y = 670) : (guest.y = 30);
   who == "host" ? (hostflag_y = host.y / 2) : (hostflag_y = host.y);
   who == "guest" ? (guestflag_y = guest.y) : (guestflag_y = guest.y / 2);
-
+  /*
   db.goals.update(1, {
     x: host.x,
     y: host.y
@@ -137,50 +94,61 @@ const init = () => {
     x: guest.x,
     y: guestflag_y
   });
-
+*/
   // initialize the goal boundries
-  db.goalboundry.update(1, {
-    x: 700 / 2 - 80,
-    y: 1,
-    w: 160,
-    h: 100,
-    c: "rgba(130, 205, 255, 0.2)"
-  });
+  goalboundry.update(
+    { who: "host" },
+    {
+      x: 700 / 2 - 80,
+      y: 1,
+      w: 160,
+      h: 100,
+      c: "rgba(130, 205, 255, 0.75)"
+    }
+  );
 
-  db.goalboundry.update(2, {
-    x: 700 / 2 - 80,
-    y: 700 - 102,
-    w: 160,
-    h: 100,
-    c: "rgba(130, 205, 255, 0.2)"
-  });
+  goalboundry.update(
+    { who: "guest" },
+    {
+      x: 700 / 2 - 80,
+      y: 700 - 102,
+      w: 160,
+      h: 100,
+      c: "rgba(130, 205, 255, 0.75)"
+    }
+  );
 
   // set initialiazed to true;
   vars.initialized = true;
-  //repaint();
+
+  repaint();
 };
 
 let promise = new Promise(function(resolve, reject) {});
-*/
-/*
-//function repaint() {
-let repaint = Dexie.async(function*() {
-  yield db.gameinfo.get(1, function(info) {
-    $("#showlatency").innerText = info.latency;
-  });
 
-  yield db.goalboundry
-    .get(1, function(b) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "#44A9EC";
-      ctx.shadowColor = "rgba(0,0,0,.2)";
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = "rgba(130, 205, 255, 0.5)";
-      ctx.lineWidth = 1;
-      ctx.rect(b.x, b.y, b.w, b.h);
-      ctx.fillRect(b.x, b.y, b.w, b.h);
-      ctx.stroke();
-    })
+//function repaint() {
+let repaint = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  let gb1 = goalboundry.find({ who: { $eq: "host" } })[0];
+  let gb2 = goalboundry.find({ who: { $eq: "guest" } })[0];
+
+  console.log(gb1.x);
+  console.log(gb2.x);
+
+  ctx.strokeStyle = "#44A9EC";
+  ctx.shadowColor = "rgba(0,0,0,.85)";
+  ctx.shadowBlur = 20;
+  ctx.fillStyle = "rgba(27, 79, 114, .75)";
+  ctx.lineWidth = 1;
+  ctx.rect(gb1.x, gb1.y, gb1.w, gb1.h);
+  ctx.fillRect(gb1.x, gb1.y, gb1.w, gb1.h);
+  ctx.stroke();
+
+  ctx.rect(gb2.x, gb2.y, gb2.w, gb2.h);
+  ctx.fillRect(gb2.x, gb2.y, gb2.w, gb2.h);
+  ctx.stroke();
+  /*
     .then(
       yield db.goalboundry.get(2, function(b) {
         ctx.strokeStyle = "#44A9EC";
@@ -201,5 +169,5 @@ let repaint = Dexie.async(function*() {
       })
     )
     .then(yield window.requestAnimationFrame(repaint));
-});
 */
+};

@@ -75,16 +75,22 @@ function init() {
         //after a game is joined by a 2nd player,
         //final game init data is sent to both players
 
+        let who = gameinfo.find({ who: { $ne: "" } })[0].who;
+
+        let playername = who == "host" ? data.guestname : data.hostname;
+        let opponentname = who == "host" ? data.hostname : data.guestname;
+
         gameinfo.update(
           { channel: { $eq: data.channel } },
           {
             channel: data.channel,
-            playername: who == "host" ? data.guestname : data.hostname,
-            opponentname: who == "host" ? data.hostname : data.guestname
+            playername: playername,
+            opponentname: opponentname
           }
         );
-        console.log(data);
-        postMessage(data);
+
+        $("#opponent").innerHTML = opponentname;
+        $("#channel").innerHTML = data.channel;
         break;
 
       case "server2client":
@@ -101,11 +107,7 @@ function init() {
           }
         );
         mv.latencycount++;
-        if (mv.latencycount == 1) {
-          setTimeout(() => {
-            //postMessage({ type: "init" });
-          }, 200);
-        }
+
         // Keep main.variables.latencyarray.length at about 300
         // The function main.methods.latency fires every 1 second
         // So this gives it about 5 minutes worth of latency data
