@@ -21,7 +21,8 @@ function init() {
 
   var latencytest = () => {};
   // Let us open a web socket
-  ws = new WebSocket("ws://192.168.1.123:8080?id=" + id);
+  //ws = new WebSocket("ws://192.168.1.123:8080?id=" + id);
+  ws = new WebSocket("wss://ctf.glitch.me?id=" + id);
 
   ws.onopen = function() {
     console.log("WebSocket Connection Opened");
