@@ -78,7 +78,7 @@ header #logo {
 #canvas_container {
   margin: 20px auto;
   width: fit-content;
-  height: fit-content;
+  height: 704px;
   width: -moz-fit-content;
   height: -moz-fit-content;
 }

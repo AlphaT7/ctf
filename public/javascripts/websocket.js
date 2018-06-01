@@ -77,11 +77,11 @@ function init() {
 
         let who = gameinfo.find({ who: { $ne: "" } })[0].who;
 
-        let playername = who == "host" ? data.guestname : data.hostname;
-        let opponentname = who == "host" ? data.hostname : data.guestname;
+        let playername = who == "host" ? data.hostname : data.guestname;
+        let opponentname = who == "host" ? data.guestname : data.hostname;
 
         gameinfo.update(
-          { channel: { $eq: data.channel } },
+          { who: { $ne: "" } },
           {
             channel: data.channel,
             playername: playername,

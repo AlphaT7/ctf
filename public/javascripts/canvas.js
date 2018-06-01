@@ -2,6 +2,7 @@ let ctx = $("canvas").getContext("2d");
 let canvas = $("canvas");
 var particles = [];
 
+/*
 const drawFlags = () => {};
 
 const clearRect = () => {
@@ -9,8 +10,12 @@ const clearRect = () => {
 };
 
 const drawGoalBoundries = () => {};
+*/
 
-/*
+const drawGreenCircle = (x, y) => {
+  ctx.drawImage(vars.sprites.greencircle, x, y);
+};
+
 canvas.addEventListener("click", function(e) {
   let mx = getMousePos(canvas, e).x;
   let my = getMousePos(canvas, e).y;
@@ -27,6 +32,43 @@ const getMousePos = (canvas, evt) => {
     x: Math.round(evt.clientX - rect.left - 25),
     y: Math.round(evt.clientY - rect.top - 25)
   };
+};
+
+const drawGoalsAndFlags = function() {
+  let who = "";
+  try {
+    who = gameinfo.find({ who: { $ne: "" } })[0].who;
+  } catch {
+    who = "";
+  }
+
+  if (who != "") {
+    let gb1 = goalboundry.find({ who: { $eq: "host" } })[0];
+    let gb2 = goalboundry.find({ who: { $eq: "guest" } })[0];
+    let f1 = flags.find({ who: { $eq: "host" } })[0];
+    let f2 = flags.find({ who: { $eq: "guest" } })[0];
+
+    ctx.strokeStyle = "#44A9EC";
+    //ctx.shadowColor = "rgba(0,0,0,.85)";
+    //ctx.shadowBlur = 20;
+    ctx.fillStyle = "rgba(27, 79, 114, .75)";
+    ctx.lineWidth = 1;
+    ctx.rect(gb1.x, gb1.y, gb1.w, gb1.h);
+    ctx.fillRect(gb1.x, gb1.y, gb1.w, gb1.h);
+    ctx.stroke();
+
+    ctx.rect(gb2.x, gb2.y, gb2.w, gb2.h);
+    ctx.fillRect(gb2.x, gb2.y, gb2.w, gb2.h);
+    ctx.stroke();
+
+    if (who == "host") {
+      ctx.drawImage(vars.sprites.playerflag, f1.x, f1.y);
+      ctx.drawImage(vars.sprites.opponentflag, f2.x, f2.y);
+    } else {
+      ctx.drawImage(vars.sprites.opponentflag, f1.x, f1.y);
+      ctx.drawImage(vars.sprites.playerflag, f2.x, f2.y);
+    }
+  }
 };
 
 const drawScene = (mx, my) => {
@@ -52,7 +94,7 @@ const drawScene = (mx, my) => {
         TweenMax.to(particle, particle.speed, {
           x1: particle.x0,
           y1: particle.y0,
-          delay: 1, //y / 30,
+          delay: 0,
           ease: Elastic.easeOut
         });
         particles.push(particle);
@@ -61,15 +103,24 @@ const drawScene = (mx, my) => {
   }
 
   requestAnimationFrame(render);
+  setTimeout(() => {
+    particles = particles.slice(570, particles.length + 1);
+    drawGreenCircle(mx, my);
+  }, 3000);
 };
 const render = function() {
-  requestAnimationFrame(render);
-
+  if (particles.length % 569 != 0) {
+    particles = particles.slice(particles.length % 569, particles.length + 1);
+  } else if (particles.length < 569) {
+    // particles.length = 0;
+  }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawGoalsAndFlags();
   for (var i = 0, j = particles.length; i < j; i++) {
     var particle = particles[i];
     ctx.fillRect(particle.x1 * 1, particle.y1 * 1, 1, 1);
   }
+  requestAnimationFrame(render);
 };
 
 const png = new Image();
@@ -77,4 +128,3 @@ png.src = "./images/white-circle.png";
 //png.src = "./images/ww_logo_txt.png";
 //png.src = "./images/white-circle2.png";
 //png.src = "./images/ww_logo-circle.png";
-*/
