@@ -21,8 +21,7 @@ function init() {
 
   var latencytest = () => {};
   // Let us open a web socket
-  //ws = new WebSocket("ws://192.168.1.123:8080?id=" + id);
-  ws = new WebSocket("wss://ctf.glitch.me?id=" + id);
+  ws = new WebSocket("ws://192.168.1.123:8080/?id=" + id);
 
   ws.onopen = function() {
     console.log("WebSocket Connection Opened");
@@ -92,6 +91,11 @@ function init() {
 
         $("#opponent").innerHTML = opponentname;
         $("#channel").innerHTML = data.channel;
+
+        if ($("#container").dataset.flag == "true") {
+          $("#container").classList.remove("container_reveal");
+          $("#container").dataset.flag = false;
+        }
         break;
 
       case "server2client":
