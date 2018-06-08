@@ -1,25 +1,68 @@
 let ctx = $("canvas").getContext("2d");
 let canvas = $("canvas");
-var particles = [];
-
-/*
-const drawFlags = () => {};
-
-const clearRect = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-};
-
-const drawGoalBoundries = () => {};
-*/
+//var particles = [];
 
 const drawGreenCircle = (x, y) => {
-  ctx.drawImage(vars.sprites.greencircle, x, y);
+  let who = "";
+  try {
+    who = gameinfo.find({ who: { $ne: "" } })[0].who;
+  } catch {
+    who = "";
+  }
+  if (who != "") {
+    let dotgroup = dots.find({ who: { $eq: who }, dropped: { $eq: true } });
+    dotgroup.forEach(element => {
+      ctx.drawImage(vars.sprites.greencircle, element.x, element.y);
+    });
+  }
 };
+
+function message(message) {
+  $("#messagebox").innerHTML = message;
+  $("#messagebox").classList.add("blink");
+  setTimeout(function() {
+    $("#messagebox").classList.remove("blink");
+  }, 3000);
+}
 
 canvas.addEventListener("click", function(e) {
   let mx = getMousePos(canvas, e).x;
   let my = getMousePos(canvas, e).y;
-  drawScene(mx, my);
+  let who = "";
+  try {
+    who = gameinfo.find({ who: { $ne: "" } })[0].who;
+  } catch {
+    who = "";
+  }
+  //drawScene(mx, my);
+
+  if (who != "") {
+    let dot = dots.find({
+      who: { $eq: who },
+      dropped: { $eq: false }
+    })[0];
+
+    if (dot == undefined) {
+      message("You have placed all available dots on the game grid.");
+    } else {
+      dots.update(
+        {
+          who: { $eq: who },
+          number: { $eq: dot.number }
+        },
+        {
+          x: mx,
+          y: my,
+          r: "7",
+          dropped: true
+        }
+      );
+    }
+  } else {
+    message("You have not setup your game yet.");
+  }
+
+  drawGreenCircle(mx, my);
 });
 
 const drawGoals = () => {
@@ -70,7 +113,7 @@ const drawGoalsAndFlags = function() {
     }
   }
 };
-
+/*
 const drawScene = (mx, my) => {
   ctx.drawImage(png, mx, my);
 
@@ -104,27 +147,30 @@ const drawScene = (mx, my) => {
 
   requestAnimationFrame(render);
   setTimeout(() => {
+    if (particles.length % 569 != 0) {
+      particles = particles.slice(particles.length % 569, particles.length + 1);
+    }
     particles = particles.slice(570, particles.length + 1);
     drawGreenCircle(mx, my);
   }, 3000);
 };
+*/
+
 const render = function() {
-  if (particles.length % 569 != 0) {
-    particles = particles.slice(particles.length % 569, particles.length + 1);
-  } else if (particles.length < 569) {
-    // particles.length = 0;
-  }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawGoalsAndFlags();
+  drawGreenCircle();
+  /*
   for (var i = 0, j = particles.length; i < j; i++) {
     var particle = particles[i];
     ctx.fillRect(particle.x1 * 1, particle.y1 * 1, 1, 1);
   }
+  */
   requestAnimationFrame(render);
 };
-
-const png = new Image();
-png.src = "./images/white-circle.png";
+render();
+//const png = new Image();
+//png.src = "./images/white-circle.png";
 //png.src = "./images/ww_logo_txt.png";
 //png.src = "./images/white-circle2.png";
 //png.src = "./images/ww_logo-circle.png";

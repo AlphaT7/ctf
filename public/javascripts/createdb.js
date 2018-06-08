@@ -2,14 +2,14 @@ const $ = function(q) {
   return document.querySelector(q);
 };
 
-let fdb = new ForerunnerDB();
-let db = fdb.db("ctf");
-let goals = db.collection("goals");
-let flags = db.collection("flags");
-let goalboundry = db.collection("goalboundry");
-let dropboundry = db.collection("dropboundry");
-let dots = db.collection("dots");
-let gameinfo = db.collection("gameinfo");
+const fdb = new ForerunnerDB();
+const db = fdb.db("ctf");
+const goals = db.collection("goals");
+const flags = db.collection("flags");
+const goalboundry = db.collection("goalboundry");
+const dropboundry = db.collection("dropboundry");
+const dots = db.collection("dots");
+const gameinfo = db.collection("gameinfo");
 
 goals.insert([
   {
@@ -91,7 +91,7 @@ for (i = 1; i <= 10; i++) {
     y: 0,
     r: 0,
     type: "placeholder",
-    live: "false"
+    live: false
   });
 }
 
@@ -105,6 +105,6 @@ for (i = 1; i <= 10; i++) {
     y: 0,
     r: 0,
     type: "placeholder",
-    live: "false"
+    live: false
   });
 }

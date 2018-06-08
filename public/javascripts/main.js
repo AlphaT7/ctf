@@ -60,6 +60,7 @@ $("#userinfo").addEventListener("submit", function(e) {
   });
 
   ws.send(JSON.stringify(data));
+
   /*
   setPerameters();
 });
